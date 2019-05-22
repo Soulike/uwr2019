@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +65,9 @@ public class XmlLoader extends DataLoader
             doc = docs.get(((StreamDataSource) dh.getDataSource()).getPath());
             if (doc == null)
             {
-                doc = builder.parse("file:///" + ((StreamDataSource) dh.getDataSource()).getPath());
+                //doc = builder.parse("file:///" + ((StreamDataSource) dh.getDataSource()).getPath());
+                File file = new File(((StreamDataSource) dh.getDataSource()).getPath());    // 使用 File 对象解决相对路径问题
+                doc = builder.parse(file);
                 docs.put(((StreamDataSource) dh.getDataSource()).getPath(), doc);
             }
             XPathExpression expr = xpath.compile(dh.getExpr());
