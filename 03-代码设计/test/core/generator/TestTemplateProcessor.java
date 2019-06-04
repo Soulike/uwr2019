@@ -73,21 +73,21 @@ public class TestTemplateProcessor implements DataSourceType
         // 这里写代码
         dsc = EasyMock.createMock(DataSourceConfig.class);
 
-        // 对 ConstDataSource 的配置
+        // 对 ConstDataSource 的配置，不关心内部方法被调用了多少次
         ConstDataSource constDataSource = EasyMock.createMock(ConstDataSource.class);
         EasyMock.expect(dsc.getConstDataSource()).andStubReturn(constDataSource);
         EasyMock.expect(constDataSource.getType()).andStubReturn(DataSource.CONST);
         EasyMock.expect(dsc.getDataSource(null)).andStubReturn(constDataSource);
 
-        // 对对应 DataHolder 的配置
+        // 对对应 DataHolder 的配置，这些方法应当仅被调用一次
         DataHolder dataHolder1 = EasyMock.createMock(DataHolder.class);
-        EasyMock.expect(dataHolder1.getValue()).andStubReturn("Female");
+        EasyMock.expect(dataHolder1.getValue()).andReturn("Female");
         DataHolder dataHolder2 = EasyMock.createMock(DataHolder.class);
-        EasyMock.expect(dataHolder2.getValue()).andStubReturn("5");
+        EasyMock.expect(dataHolder2.getValue()).andReturn("5");
         DataHolder dataHolder3 = EasyMock.createMock(DataHolder.class);
-        EasyMock.expect(dataHolder3.getValue()).andStubReturn("5.0");
-        EasyMock.expect(dataHolder3.getExpr()).andStubReturn("${num}+${readme}");
-        EasyMock.expect(dataHolder3.fillValue()).andStubReturn(null);
+        EasyMock.expect(dataHolder3.getValue()).andReturn("5.0");
+        EasyMock.expect(dataHolder3.getExpr()).andReturn("${num}+${readme}");
+        EasyMock.expect(dataHolder3.fillValue()).andReturn(null);
 
         ArrayList<DataHolder> vars = new ArrayList<>();
         vars.add(dataHolder1);
@@ -95,12 +95,13 @@ public class TestTemplateProcessor implements DataSourceType
         vars.add(dataHolder3);
         EasyMock.expect(constDataSource.getVars()).andStubReturn(vars);
 
-        EasyMock.expect(constDataSource.getDataHolder("sex")).andStubReturn(dataHolder1);
-        EasyMock.expect(constDataSource.getDataHolder("readme")).andStubReturn(dataHolder2);
-        EasyMock.expect(constDataSource.getDataHolder("testexpr")).andStubReturn(dataHolder3);
+        EasyMock.expect(constDataSource.getDataHolder("sex")).andReturn(dataHolder1);
+        EasyMock.expect(constDataSource.getDataHolder("readme")).andReturn(dataHolder2);
+        EasyMock.expect(constDataSource.getDataHolder("testexpr")).andReturn(dataHolder3);
 
         EasyMock.replay(constDataSource, dataHolder1, dataHolder2, dataHolder3);
 
+        // 静态方法，不关心调用次数
         PowerMock.mockStatic(DataSourceConfig.class);
         EasyMock.expect(DataSourceConfig.newInstance()).andStubReturn(dsc);
 
