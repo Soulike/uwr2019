@@ -1,9 +1,7 @@
 package core.generator;
 
-import core.common.DataHolder;
-import core.common.DataSource;
-import core.common.DataSourceConfig;
-import core.common.DataSourceType;
+import core.common.*;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +10,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -72,6 +71,39 @@ public class TestTemplateProcessor implements DataSourceType
         //
         //
         // 这里写代码
+        dsc = EasyMock.createMock(DataSourceConfig.class);
+
+        // 对 ConstDataSource 的配置
+        ConstDataSource constDataSource = EasyMock.createMock(ConstDataSource.class);
+        EasyMock.expect(dsc.getConstDataSource()).andStubReturn(constDataSource);
+        EasyMock.expect(constDataSource.getType()).andStubReturn(DataSource.CONST);
+        EasyMock.expect(dsc.getDataSource(null)).andStubReturn(constDataSource);
+
+        // 对对应 DataHolder 的配置
+        DataHolder dataHolder1 = EasyMock.createMock(DataHolder.class);
+        EasyMock.expect(dataHolder1.getValue()).andStubReturn("Female");
+        DataHolder dataHolder2 = EasyMock.createMock(DataHolder.class);
+        EasyMock.expect(dataHolder2.getValue()).andStubReturn("5");
+        DataHolder dataHolder3 = EasyMock.createMock(DataHolder.class);
+        EasyMock.expect(dataHolder3.getValue()).andStubReturn("5.0");
+        EasyMock.expect(dataHolder3.getExpr()).andStubReturn("${num}+${readme}");
+        EasyMock.expect(dataHolder3.fillValue()).andStubReturn(null);
+
+        ArrayList<DataHolder> vars = new ArrayList<>();
+        vars.add(dataHolder1);
+        vars.add(dataHolder2);
+        vars.add(dataHolder3);
+        EasyMock.expect(constDataSource.getVars()).andStubReturn(vars);
+
+        EasyMock.expect(constDataSource.getDataHolder("sex")).andStubReturn(dataHolder1);
+        EasyMock.expect(constDataSource.getDataHolder("readme")).andStubReturn(dataHolder2);
+        EasyMock.expect(constDataSource.getDataHolder("testexpr")).andStubReturn(dataHolder3);
+
+        EasyMock.replay(constDataSource, dataHolder1, dataHolder2, dataHolder3);
+
+        PowerMock.mockStatic(DataSourceConfig.class);
+        EasyMock.expect(DataSourceConfig.newInstance()).andStubReturn(dsc);
+
         //
         //------------------------------------------------
         //5. 重放所有的行为。
